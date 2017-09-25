@@ -2,7 +2,7 @@
 #               Nested ESXi hosts enable w/vSAN + VCSA 6.5. Expects a single physical ESXi host
 #               as the endpoint and all four VMs will be deployed to physical ESXi host
 
-# Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab
+# Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab!!
 $VIServer = "172.30.0.10"
 $VIUsername = "administrator@lab.offis.cloud"
 $VIPassword = "OffisLab1!"
