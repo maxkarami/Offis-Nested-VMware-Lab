@@ -46,7 +46,7 @@ $VCSASSHEnable = "true"
 # General Deployment Configuration for Nested ESXi, VCSA & NSX VMs
 $VirtualSwitchType = "VDS" # VSS or VDS
 $VMNetwork = "DPortGroup"
-$VMDatastore = "pesxi2_datastore"
+$VMDatastore = "pesxi1_datastore"
 $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
@@ -58,7 +58,7 @@ $VMSyslog = "172.30.0.1"
 $VMSSH = "true"
 $VMVMFS = "false"
 # Applicable to VC Deployment Target only
-$VMCluster = "labhost"
+$VMCluster = "labcluster1"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
 $NewVCDatacenterName = "offislab4"
@@ -184,6 +184,10 @@ if($preCheck -eq 1) {
             exit
         }
 
+        if(-not (Get-Module -Name "PowerNSX")) {
+            Import-Module PowerNSX
+            Write-Host "`nPowerNSX Module is not loaded. trying to load PowerNSX before running script ...`n"
+        }
         if(-not (Get-Module -Name "PowerNSX")) {
             Write-Host -ForegroundColor Red "`nPowerNSX Module is not loaded, please install and load PowerNSX before running script ...`nexiting"
             exit

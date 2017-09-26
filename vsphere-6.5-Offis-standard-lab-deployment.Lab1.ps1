@@ -58,7 +58,7 @@ $VMSyslog = "172.30.0.1"
 $VMSSH = "true"
 $VMVMFS = "false"
 # Applicable to VC Deployment Target only
-$VMCluster = "labhost"
+$VMCluster = "labcluster1"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
 $NewVCDatacenterName = "offislab1"
