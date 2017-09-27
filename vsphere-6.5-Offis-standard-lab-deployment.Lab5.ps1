@@ -20,9 +20,9 @@ $ESXiProfileName = "ESXi-6.5.0-20170404001-standard" # Used for online upgrade o
 
 # Nested ESXi VMs to deploy
 $NestedESXiHostnameToIPs = @{
-    "lab2-vesxi65-1" = "172.30.2.11"
-    "lab2-vesxi65-2" = "172.30.2.12"
-    "lab2-vesxi65-3" = "172.30.2.13"
+    "lab5-vesxi65-1" = "172.30.5.11"
+    "lab5-vesxi65-2" = "172.30.5.12"
+    "lab5-vesxi65-3" = "172.30.5.13"
 }
 
 # Nested ESXi VM Resources
@@ -33,12 +33,12 @@ $NestedESXiCapacityvDisk = "100" #GB
 
 # VCSA Deployment Configuration
 $VCSADeploymentSize = "tiny"
-$VCSADisplayName = "lab2-vcenter65"
-$VCSAIPAddress = "172.30.2.10"
-$VCSAHostname = "172.30.2.10" #Change to IP if you don't have valid DNS
+$VCSADisplayName = "lab5-vcenter65"
+$VCSAIPAddress = "172.30.5.10"
+$VCSAHostname = "172.30.5.10" #Change to IP if you don't have valid DNS
 $VCSAPrefix = "16"
-$VCSASSODomainName = "lab2.offis.cloud"
-$VCSASSOSiteName = "lab2.offis.cloud"
+$VCSASSODomainName = "lab5.offis.cloud"
+$VCSASSOSiteName = "lab5.offis.cloud"
 $VCSASSOPassword = "VMware1!"
 $VCSARootPassword = "VMware1!"
 $VCSASSHEnable = "true"
@@ -46,31 +46,31 @@ $VCSASSHEnable = "true"
 # General Deployment Configuration for Nested ESXi, VCSA & NSX VMs
 $VirtualSwitchType = "VDS" # VSS or VDS
 $VMNetwork = "DPortGroup"
-$VMDatastore = "pesxi1_datastore"
+$VMDatastore = "pesxi2_datastore"
 $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
-$VMNTP = "172.30.0.1"
+$VMNTP = "0.au.pool.ntp.org"
 $VMPassword = "VMware1!"
-$VMDomain = "lab2.offis.cloud"
+$VMDomain = "lab5.offis.cloud"
 $VMSyslog = "172.30.0.1"
 # Applicable to Nested ESXi only
 $VMSSH = "true"
 $VMVMFS = "false"
 # Applicable to VC Deployment Target only
-$VMCluster = "labcluster1"
+$VMCluster = "labcluster2"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
-$NewVCDatacenterName = "offislab2"
-$NewVCVSANClusterName = "offislab2"
+$NewVCDatacenterName = "offislab5"
+$NewVCVSANClusterName = "offislab5"
 
 # NSX Manager Configuration
 $DeployNSX = 1
 $NSXvCPU = "2" # Reconfigure NSX vCPU
 $NSXvMEM = "8" # Reconfigure NSX vMEM (GB)
-$NSXDisplayName = "lab2-nsx63"
-$NSXHostname = "172.30.2.20"
-$NSXIPAddress = "172.30.2.20"
+$NSXDisplayName = "lab5-nsx63"
+$NSXHostname = "172.30.5.20"
+$NSXIPAddress = "172.30.5.20"
 $NSXNetmask = "255.255.0.0"
 $NSXGateway = "172.30.0.1"
 $NSXSSHEnable = "true"
@@ -777,19 +777,9 @@ Disconnect-VIServer $viConnection -Confirm:$false -Force
 
 
 if($setupNewVC -eq 1) {
-    Sleep 60
+    Sleep 180
     My-Logger "Connecting to the new VCSA ..."
     $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
-    My-Logger "Retrying Connecting to the new VCSA after 60 Seconds..."
-    Sleep 60
-    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
-    My-Logger "Retrying Connecting to the new VCSA after 120 Seconds..."
-    Sleep 120
-    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
-    My-Logger "Retrying Connecting to the new VCSA after 120 Seconds..."
-    Sleep 120
-    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
-    
 
     My-Logger "Creating Datacenter $NewVCDatacenterName ..."
     New-Datacenter -Server $vc -Name $NewVCDatacenterName -Location (Get-Folder -Type Datacenter -Server $vc) | Out-File -Append -LiteralPath $verboseLogFile

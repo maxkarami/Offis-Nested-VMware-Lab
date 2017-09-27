@@ -20,9 +20,9 @@ $ESXiProfileName = "ESXi-6.5.0-20170404001-standard" # Used for online upgrade o
 
 # Nested ESXi VMs to deploy
 $NestedESXiHostnameToIPs = @{
-    "lab3-vesxi65-1" = "172.30.3.11"
-    "lab3-vesxi65-2" = "172.30.3.12"
-    "lab3-vesxi65-3" = "172.30.3.13"
+    "lab6-vesxi65-1" = "172.30.6.11"
+    "lab6-vesxi65-2" = "172.30.6.12"
+    "lab6-vesxi65-3" = "172.30.6.13"
 }
 
 # Nested ESXi VM Resources
@@ -33,12 +33,12 @@ $NestedESXiCapacityvDisk = "100" #GB
 
 # VCSA Deployment Configuration
 $VCSADeploymentSize = "tiny"
-$VCSADisplayName = "lab3-vcenter65"
-$VCSAIPAddress = "172.30.3.10"
-$VCSAHostname = "172.30.3.10" #Change to IP if you don't have valid DNS
+$VCSADisplayName = "lab6-vcenter65"
+$VCSAIPAddress = "172.30.6.10"
+$VCSAHostname = "172.30.6.10" #Change to IP if you don't have valid DNS
 $VCSAPrefix = "16"
-$VCSASSODomainName = "lab3.offis.cloud"
-$VCSASSOSiteName = "lab3.offis.cloud"
+$VCSASSODomainName = "lab6.offis.cloud"
+$VCSASSOSiteName = "lab6.offis.cloud"
 $VCSASSOPassword = "VMware1!"
 $VCSARootPassword = "VMware1!"
 $VCSASSHEnable = "true"
@@ -46,31 +46,31 @@ $VCSASSHEnable = "true"
 # General Deployment Configuration for Nested ESXi, VCSA & NSX VMs
 $VirtualSwitchType = "VDS" # VSS or VDS
 $VMNetwork = "DPortGroup"
-$VMDatastore = "pesxi1_datastore"
+$VMDatastore = "pesxi2_datastore"
 $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
 $VMNTP = "0.au.pool.ntp.org"
 $VMPassword = "VMware1!"
-$VMDomain = "lab3.offis.cloud"
+$VMDomain = "lab6.offis.cloud"
 $VMSyslog = "172.30.0.1"
 # Applicable to Nested ESXi only
 $VMSSH = "true"
 $VMVMFS = "false"
 # Applicable to VC Deployment Target only
-$VMCluster = "labcluster1"
+$VMCluster = "labcluster2"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
-$NewVCDatacenterName = "offislab3"
-$NewVCVSANClusterName = "offislab3"
+$NewVCDatacenterName = "offislab6"
+$NewVCVSANClusterName = "offislab6"
 
 # NSX Manager Configuration
 $DeployNSX = 1
 $NSXvCPU = "2" # Reconfigure NSX vCPU
 $NSXvMEM = "8" # Reconfigure NSX vMEM (GB)
-$NSXDisplayName = "lab3-nsx63"
-$NSXHostname = "172.30.3.20"
-$NSXIPAddress = "172.30.3.20"
+$NSXDisplayName = "lab6-nsx63"
+$NSXHostname = "172.30.6.20"
+$NSXIPAddress = "172.30.6.20"
 $NSXNetmask = "255.255.0.0"
 $NSXGateway = "172.30.0.1"
 $NSXSSHEnable = "true"
@@ -120,17 +120,17 @@ $esxiTotStorage = 0
 $vcsaTotalStorage = 0
 $nsxTotalStorage = 0
 
-$preCheck = 0
-$confirmDeployment = 0
-$deployNestedESXiVMs = 0
-$deployVCSA = 0
+$preCheck = 1
+$confirmDeployment = 1
+$deployNestedESXiVMs = 1
+$deployVCSA = 1
 $setupNewVC = 1
 $addESXiHostsToVC = 1
 $configureVSANDiskGroups = 1
-$clearVSANHealthCheckAlarm = 0
+$clearVSANHealthCheckAlarm = 1
 $setupVXLAN = 1
 $configureNSX = 1
-$moveVMsIntovApp = 0
+$moveVMsIntovApp = 1
 
 $StartTime = Get-Date
 
@@ -184,6 +184,10 @@ if($preCheck -eq 1) {
             exit
         }
 
+        if(-not (Get-Module -Name "PowerNSX")) {
+            Import-Module PowerNSX
+            Write-Host "`nPowerNSX Module is not loaded. trying to load PowerNSX before running script ...`n"
+        }
         if(-not (Get-Module -Name "PowerNSX")) {
             Write-Host -ForegroundColor Red "`nPowerNSX Module is not loaded, please install and load PowerNSX before running script ...`nexiting"
             exit
@@ -769,11 +773,11 @@ if($moveVMsIntovApp -eq 1 -and $DeploymentTarget -eq "VCENTER") {
 }
 
 My-Logger "Disconnecting from $VIServer ..."
-Disconnect-VIServer $viConnection -Confirm:$false
+Disconnect-VIServer $viConnection -Confirm:$false -Force
 
 
 if($setupNewVC -eq 1) {
-    Sleep 120
+    Sleep 180
     My-Logger "Connecting to the new VCSA ..."
     $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
 

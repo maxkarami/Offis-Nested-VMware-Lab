@@ -20,9 +20,9 @@ $ESXiProfileName = "ESXi-6.5.0-20170404001-standard" # Used for online upgrade o
 
 # Nested ESXi VMs to deploy
 $NestedESXiHostnameToIPs = @{
-    "lab2-vesxi65-1" = "172.30.2.11"
-    "lab2-vesxi65-2" = "172.30.2.12"
-    "lab2-vesxi65-3" = "172.30.2.13"
+    "lab0-vesxi65-1" = "172.30.0.11"
+    "lab0-vesxi65-2" = "172.30.0.12"
+    "lab0-vesxi65-3" = "172.30.0.13"
 }
 
 # Nested ESXi VM Resources
@@ -33,14 +33,14 @@ $NestedESXiCapacityvDisk = "100" #GB
 
 # VCSA Deployment Configuration
 $VCSADeploymentSize = "tiny"
-$VCSADisplayName = "lab2-vcenter65"
-$VCSAIPAddress = "172.30.2.10"
-$VCSAHostname = "172.30.2.10" #Change to IP if you don't have valid DNS
+$VCSADisplayName = "lab0-vcenter65"
+$VCSAIPAddress = "172.30.0.10"
+$VCSAHostname = "172.30.0.10" #Change to IP if you don't have valid DNS
 $VCSAPrefix = "16"
-$VCSASSODomainName = "lab2.offis.cloud"
-$VCSASSOSiteName = "lab2.offis.cloud"
-$VCSASSOPassword = "VMware1!"
-$VCSARootPassword = "VMware1!"
+$VCSASSODomainName = "lab0.offis.cloud"
+$VCSASSOSiteName = "lab0.offis.cloud"
+$VCSASSOPassword = "OffisLab1!"
+$VCSARootPassword = "OffisLab1!"
 $VCSASSHEnable = "true"
 
 # General Deployment Configuration for Nested ESXi, VCSA & NSX VMs
@@ -51,8 +51,8 @@ $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
 $VMNTP = "172.30.0.1"
-$VMPassword = "VMware1!"
-$VMDomain = "lab2.offis.cloud"
+$VMPassword = "OffisLab1!"
+$VMDomain = "lab0.offis.cloud"
 $VMSyslog = "172.30.0.1"
 # Applicable to Nested ESXi only
 $VMSSH = "true"
@@ -61,22 +61,22 @@ $VMVMFS = "false"
 $VMCluster = "labcluster1"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
-$NewVCDatacenterName = "offislab2"
-$NewVCVSANClusterName = "offislab2"
+$NewVCDatacenterName = "offislab0"
+$NewVCVSANClusterName = "offislab0"
 
 # NSX Manager Configuration
 $DeployNSX = 1
 $NSXvCPU = "2" # Reconfigure NSX vCPU
 $NSXvMEM = "8" # Reconfigure NSX vMEM (GB)
-$NSXDisplayName = "lab2-nsx63"
-$NSXHostname = "172.30.2.20"
-$NSXIPAddress = "172.30.2.20"
+$NSXDisplayName = "nsx.lab.offis.cloud"
+$NSXHostname = "172.30.0.20"
+$NSXIPAddress = "172.30.0.20"
 $NSXNetmask = "255.255.0.0"
 $NSXGateway = "172.30.0.1"
 $NSXSSHEnable = "true"
 $NSXCEIPEnable = "false"
-$NSXUIPassword = "VMware1!VMware1!"
-$NSXCLIPassword = "VMware1!VMware1!"
+$NSXUIPassword = "OffisLab1!"
+$NSXCLIPassword = "OffisLab1!"
 
 # VDS / VXLAN Configurations
 $PrivateVXLANVMNetwork = "DPortGroup" # Existing Portgroup
@@ -120,18 +120,18 @@ $esxiTotStorage = 0
 $vcsaTotalStorage = 0
 $nsxTotalStorage = 0
 
-$preCheck = 1
-$confirmDeployment = 1
-$deployNestedESXiVMs = 1
-$deployVCSA = 1
-$setupNewVC = 1
-$addESXiHostsToVC = 1
-$configureVSANDiskGroups = 1
-$clearVSANHealthCheckAlarm = 1
+$preCheck = 0
+$confirmDeployment = 0
+$deployNestedESXiVMs = 0
+$deployVCSA = 0
+$setupNewVC = 0
+$addESXiHostsToVC = 0
+$configureVSANDiskGroups = 0
+$clearVSANHealthCheckAlarm = 0
 $setupVXLAN = 1
 $configureNSX = 1
-$moveVMsIntovApp = 1
-
+$moveVMsIntovApp = 0
+$DeployNSX = 1
 $StartTime = Get-Date
 
 Function My-Logger {
@@ -629,7 +629,7 @@ if($DeployNSX -eq 1) {
 }
 
 if($upgradeESXi -eq 1) {
-    sleep 60
+
     $NestedESXiHostnameToIPs.GetEnumerator() | sort -Property Value | Foreach-Object {
         $VMName = $_.Key
         $VMIPAddress = $_.Value
@@ -644,7 +644,7 @@ if($upgradeESXi -eq 1) {
             }
             catch {
                 My-Logger "$VMName is not ready yet, sleeping 30seconds ..."
-                sleep 30
+           
             }
         }
         # This is apparently needed due to patching using online image profile taking longer
@@ -883,7 +883,7 @@ if($setupNewVC -eq 1) {
 }
 
 if($configureNSX -eq 1 -and $DeployNSX -eq 1 -and $setupVXLAN -eq 1) {
-    sleep 30
+    Sleep 120
     if(!(Connect-NSXServer -Server $NSXHostname -Username admin -Password $NSXUIPassword -DisableVIAutoConnect -WarningAction SilentlyContinue)) {
         Write-Host -ForegroundColor Red "Unable to connect to NSX Manager, please check the deployment"
         exit
@@ -891,12 +891,12 @@ if($configureNSX -eq 1 -and $DeployNSX -eq 1 -and $setupVXLAN -eq 1) {
         My-Logger "Successfully logged into NSX Manager $NSXHostname ..."
     }
 
-    $ssoUsername = "administrator@$VCSASSODomainName"
+    $ssoUsername = "administrator@lab.offis.cloud"
     My-Logger "Registering NSX Manager with vCenter Server $VCSAHostname ..."
-    $vcConfig = Set-NsxManager -vCenterServer $VCSAHostname -vCenterUserName $ssoUsername -vCenterPassword $VCSASSOPassword
+    $vcConfig = Set-NsxManager -vCenterServer $VCSAHostname -vCenterUserName administrator@lab.offis.cloud -vCenterPassword OffisLab1!
 
     My-Logger "Registering NSX Manager with vCenter SSO $VCSAHostname ..."
-    $ssoConfig = Set-NsxManager -SsoServer $VCSAHostname -SsoUserName $ssoUsername -SsoPassword $VCSASSOPassword -AcceptAnyThumbprint
+    $ssoConfig = Set-NsxManager -SsoServer $VCSAHostname -SsoUserName administrator@lab.offis.cloud -SsoPassword OffisLab1! -AcceptAnyThumbprint
 
     My-Logger "Disconnecting from NSX Manager ..."
     Disconnect-NsxServer

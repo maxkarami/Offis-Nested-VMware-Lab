@@ -50,7 +50,7 @@ $VMDatastore = "pesxi1_datastore"
 $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
-$VMNTP = "0.au.pool.ntp.org"
+$VMNTP = "172.30.0.1"
 $VMPassword = "VMware1!"
 $VMDomain = "lab1.offis.cloud"
 $VMSyslog = "172.30.0.1"
@@ -184,6 +184,10 @@ if($preCheck -eq 1) {
             exit
         }
 
+        if(-not (Get-Module -Name "PowerNSX")) {
+            Import-Module PowerNSX
+            Write-Host "`nPowerNSX Module is not loaded. trying to load PowerNSX before running script ...`n"
+        }
         if(-not (Get-Module -Name "PowerNSX")) {
             Write-Host -ForegroundColor Red "`nPowerNSX Module is not loaded, please install and load PowerNSX before running script ...`nexiting"
             exit
@@ -769,13 +773,23 @@ if($moveVMsIntovApp -eq 1 -and $DeploymentTarget -eq "VCENTER") {
 }
 
 My-Logger "Disconnecting from $VIServer ..."
-Disconnect-VIServer $viConnection -Confirm:$false
+Disconnect-VIServer $viConnection -Confirm:$false -Force
 
 
 if($setupNewVC -eq 1) {
-    Sleep 120
+    Sleep 60
     My-Logger "Connecting to the new VCSA ..."
     $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 60 Seconds..."
+    Sleep 60
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 120 Seconds..."
+    Sleep 120
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 120 Seconds..."
+    Sleep 120
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    
 
     My-Logger "Creating Datacenter $NewVCDatacenterName ..."
     New-Datacenter -Server $vc -Name $NewVCDatacenterName -Location (Get-Folder -Type Datacenter -Server $vc) | Out-File -Append -LiteralPath $verboseLogFile
@@ -869,6 +883,7 @@ if($setupNewVC -eq 1) {
 }
 
 if($configureNSX -eq 1 -and $DeployNSX -eq 1 -and $setupVXLAN -eq 1) {
+    sleep 30
     if(!(Connect-NSXServer -Server $NSXHostname -Username admin -Password $NSXUIPassword -DisableVIAutoConnect -WarningAction SilentlyContinue)) {
         Write-Host -ForegroundColor Red "Unable to connect to NSX Manager, please check the deployment"
         exit

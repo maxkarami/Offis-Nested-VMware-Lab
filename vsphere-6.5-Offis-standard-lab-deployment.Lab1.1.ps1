@@ -2,7 +2,7 @@
 #               Nested ESXi hosts enable w/vSAN + VCSA 6.5. Expects a single physical ESXi host
 #               as the endpoint and all four VMs will be deployed to physical ESXi host
 
-# Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab!
+# Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab
 $VIServer = "172.30.0.10"
 $VIUsername = "administrator@lab.offis.cloud"
 $VIPassword = "OffisLab1!"
@@ -50,7 +50,7 @@ $VMDatastore = "pesxi1_datastore"
 $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
-$VMNTP = "0.au.pool.ntp.org"
+$VMNTP = "172.30.0.1"
 $VMPassword = "VMware1!"
 $VMDomain = "lab1.offis.cloud"
 $VMSyslog = "172.30.0.1"
@@ -89,7 +89,7 @@ $VXLANNetmask = "255.255.255.0"
 # Set to 1 only if you have DNS (forward/reverse) for ESXi hostnames
 $addHostByDnsName = 0
 # Upgrade vESXi hosts (defaults to pulling upgrade from VMware using profile specified in $ESXiProfileName)
-$upgradeESXi = 1
+$upgradeESXi = 0
 # Set to 1 only if you want to upgrade using local bundle specified in $ESXi65OfflineBundle
 $offlineUpgrade = 0
 
@@ -124,13 +124,13 @@ $preCheck = 0
 $confirmDeployment = 0
 $deployNestedESXiVMs = 0
 $deployVCSA = 0
-$setupNewVC = 0
-$addESXiHostsToVC = 0
-$configureVSANDiskGroups = 0
-$clearVSANHealthCheckAlarm = 0
-$setupVXLAN = 0
-$configureNSX = 0
-$moveVMsIntovApp = 0
+$setupNewVC = 1
+$addESXiHostsToVC = 1
+$configureVSANDiskGroups = 1
+$clearVSANHealthCheckAlarm = 1
+$setupVXLAN = 1
+$configureNSX = 1
+$moveVMsIntovApp = 1
 
 $StartTime = Get-Date
 
@@ -184,6 +184,10 @@ if($preCheck -eq 1) {
             exit
         }
 
+        if(-not (Get-Module -Name "PowerNSX")) {
+            Import-Module PowerNSX
+            Write-Host "`nPowerNSX Module is not loaded. trying to load PowerNSX before running script ...`n"
+        }
         if(-not (Get-Module -Name "PowerNSX")) {
             Write-Host -ForegroundColor Red "`nPowerNSX Module is not loaded, please install and load PowerNSX before running script ...`nexiting"
             exit
@@ -614,7 +618,7 @@ if($DeployNSX -eq 1) {
         $ovfconfig.common.vsm_cli_en_passwd_0.value = $NSXCLIPassword
 
         My-Logger "Deploying NSX VM $NSXDisplayName ..."
-        $vm = Import-VApp -Source $NSXOVA -OvfConfiguration $ovfconfig -Name $NSXDisplayName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin
+        #$vm = Import-VApp -Source $NSXOVA -OvfConfiguration $ovfconfig -Name $NSXDisplayName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin
 
         My-Logger "Updating vCPU Count to $NSXvCPU & vMEM to $NSXvMEM GB ..."
         Set-VM -Server $viConnection -VM $vm -NumCpu $NSXvCPU -MemoryGB $NSXvMEM -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
@@ -633,7 +637,7 @@ if($upgradeESXi -eq 1) {
         My-Logger "Connecting directly to $VMName for ESXi upgrade ..."
         while(1) {
             try {
-                $results = Invoke-WebRequest -Uri https://$VMIPAddress/ui -Method GET -UseBasicParsing
+                $results = Invoke-WebRequest -Uri https://$VMIPAddress/ui -Method GET
                 if($results.StatusCode -eq 200) {
                     break
                 }
@@ -653,7 +657,6 @@ if($upgradeESXi -eq 1) {
 
         if($offlineUpgrade -eq 1) {
             My-Logger "Upgrading $VMname using offline bundle $ESXi65OfflineBundle ..."
-            
             Install-VMHostPatch -VMHost $VMIPAddress -LocalPath $ESXi65OfflineBundle -HostUsername root -HostPassword $VMPassword -WarningAction SilentlyContinue -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
         }
         else {
@@ -770,13 +773,23 @@ if($moveVMsIntovApp -eq 1 -and $DeploymentTarget -eq "VCENTER") {
 }
 
 My-Logger "Disconnecting from $VIServer ..."
-Disconnect-VIServer $viConnection -Confirm:$false
+Disconnect-VIServer $viConnection -Confirm:$false -Force
 
 
 if($setupNewVC -eq 1) {
-    Sleep 120
+    Sleep 60
     My-Logger "Connecting to the new VCSA ..."
     $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 60 Seconds..."
+    Sleep 60
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 120 Seconds..."
+    Sleep 120
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 120 Seconds..."
+    Sleep 120
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    
 
     My-Logger "Creating Datacenter $NewVCDatacenterName ..."
     New-Datacenter -Server $vc -Name $NewVCDatacenterName -Location (Get-Folder -Type Datacenter -Server $vc) | Out-File -Append -LiteralPath $verboseLogFile
@@ -870,6 +883,7 @@ if($setupNewVC -eq 1) {
 }
 
 if($configureNSX -eq 1 -and $DeployNSX -eq 1 -and $setupVXLAN -eq 1) {
+    sleep 30
     if(!(Connect-NSXServer -Server $NSXHostname -Username admin -Password $NSXUIPassword -DisableVIAutoConnect -WarningAction SilentlyContinue)) {
         Write-Host -ForegroundColor Red "Unable to connect to NSX Manager, please check the deployment"
         exit
