@@ -50,7 +50,7 @@ $VMDatastore = "pesxi2_datastore"
 $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
-$VMNTP = "0.au.pool.ntp.org"
+$VMNTP = "172.30.0.1"
 $VMPassword = "VMware1!"
 $VMDomain = "lab5.offis.cloud"
 $VMSyslog = "172.30.0.1"
@@ -777,9 +777,19 @@ Disconnect-VIServer $viConnection -Confirm:$false -Force
 
 
 if($setupNewVC -eq 1) {
-    Sleep 180
+    Sleep 60
     My-Logger "Connecting to the new VCSA ..."
     $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 60 Seconds..."
+    Sleep 60
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 120 Seconds..."
+    Sleep 120
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    My-Logger "Retrying Connecting to the new VCSA after 120 Seconds..."
+    Sleep 120
+    $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+    
 
     My-Logger "Creating Datacenter $NewVCDatacenterName ..."
     New-Datacenter -Server $vc -Name $NewVCDatacenterName -Location (Get-Folder -Type Datacenter -Server $vc) | Out-File -Append -LiteralPath $verboseLogFile
@@ -829,8 +839,8 @@ if($setupNewVC -eq 1) {
     }
 
     if($configureVSANDiskGroups -eq 1) {
-        My-Logger "Enabling VSAN Space Efficiency/De-Dupe & disabling VSAN Health Check ..."
-        Get-VsanClusterConfiguration -Server $vc -Cluster $NewVCVSANClusterName | Set-VsanClusterConfiguration -SpaceEfficiencyEnabled $true -HealthCheckIntervalMinutes 0 | Out-File -Append -LiteralPath $verboseLogFile
+        My-Logger "Enabling VSAN Space Efficiency/De-Dupe & disabling VSAN Health Check ...!!Diabled!!"
+        #Get-VsanClusterConfiguration -Server $vc -Cluster $NewVCVSANClusterName | Set-VsanClusterConfiguration -SpaceEfficiencyEnabled $true -HealthCheckIntervalMinutes 0 | Out-File -Append -LiteralPath $verboseLogFile
 
 
         foreach ($vmhost in Get-Cluster -Server $vc | Get-VMHost) {

@@ -839,8 +839,8 @@ if($setupNewVC -eq 1) {
     }
 
     if($configureVSANDiskGroups -eq 1) {
-        My-Logger "Enabling VSAN Space Efficiency/De-Dupe & disabling VSAN Health Check ..."
-        Get-VsanClusterConfiguration -Server $vc -Cluster $NewVCVSANClusterName | Set-VsanClusterConfiguration -SpaceEfficiencyEnabled $true -HealthCheckIntervalMinutes 0 | Out-File -Append -LiteralPath $verboseLogFile
+        My-Logger "Enabling VSAN Space Efficiency/De-Dupe & disabling VSAN Health Check ...!!Diabled!!"
+        #Get-VsanClusterConfiguration -Server $vc -Cluster $NewVCVSANClusterName | Set-VsanClusterConfiguration -SpaceEfficiencyEnabled $true -HealthCheckIntervalMinutes 0 | Out-File -Append -LiteralPath $verboseLogFile
 
 
         foreach ($vmhost in Get-Cluster -Server $vc | Get-VMHost) {
