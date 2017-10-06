@@ -4,8 +4,8 @@
 
 # Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab
 $VIServer = "172.30.0.10"
-$VIUsername = "administrator@lab.offis.cloud"
-$VIPassword = "OffisLab1!"
+$VIUsername = "labdeploy@lab.offis.cloud"
+$VIPassword = "OffisLabDeploy1!"
 
 # Specifies whether deployment is to an ESXi host or vCenter Server
 # Use either ESXI or VCENTER

@@ -4,8 +4,8 @@
 
 # Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab
 $VIServer = "172.30.0.10"
-$VIUsername = "administrator@lab.offis.cloud"
-$VIPassword = "OffisLab1!"
+$VIUsername = "labdeploy@lab.offis.cloud"
+$VIPassword = "OffisLabDeploy1!"
 
 # Specifies whether deployment is to an ESXi host or vCenter Server
 # Use either ESXI or VCENTER
@@ -39,8 +39,8 @@ $VCSAHostname = "172.30.0.10" #Change to IP if you don't have valid DNS
 $VCSAPrefix = "16"
 $VCSASSODomainName = "lab0.offis.cloud"
 $VCSASSOSiteName = "lab0.offis.cloud"
-$VCSASSOPassword = "OffisLab1!"
-$VCSARootPassword = "OffisLab1!"
+$VCSASSOPassword = "OffisLabDeploy1!"
+$VCSARootPassword = "OffisLabDeploy1!"
 $VCSASSHEnable = "true"
 
 # General Deployment Configuration for Nested ESXi, VCSA & NSX VMs
@@ -51,7 +51,7 @@ $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
 $VMNTP = "172.30.0.1"
-$VMPassword = "OffisLab1!"
+$VMPassword = "OffisLabDeploy1!"
 $VMDomain = "lab0.offis.cloud"
 $VMSyslog = "172.30.0.1"
 # Applicable to Nested ESXi only
@@ -75,8 +75,8 @@ $NSXNetmask = "255.255.0.0"
 $NSXGateway = "172.30.0.1"
 $NSXSSHEnable = "true"
 $NSXCEIPEnable = "false"
-$NSXUIPassword = "OffisLab1!"
-$NSXCLIPassword = "OffisLab1!"
+$NSXUIPassword = "OffisLabDeploy1!"
+$NSXCLIPassword = "OffisLabDeploy1!"
 
 # VDS / VXLAN Configurations
 $PrivateVXLANVMNetwork = "DPortGroup" # Existing Portgroup
@@ -891,12 +891,12 @@ if($configureNSX -eq 1 -and $DeployNSX -eq 1 -and $setupVXLAN -eq 1) {
         My-Logger "Successfully logged into NSX Manager $NSXHostname ..."
     }
 
-    $ssoUsername = "administrator@lab.offis.cloud"
+    $ssoUsername = "labdeploy@lab.offis.cloud"
     My-Logger "Registering NSX Manager with vCenter Server $VCSAHostname ..."
-    $vcConfig = Set-NsxManager -vCenterServer $VCSAHostname -vCenterUserName administrator@lab.offis.cloud -vCenterPassword OffisLab1!
+    $vcConfig = Set-NsxManager -vCenterServer $VCSAHostname -vCenterUserName labdeploy@lab.offis.cloud -vCenterPassword OffisLabDeploy1!
 
     My-Logger "Registering NSX Manager with vCenter SSO $VCSAHostname ..."
-    $ssoConfig = Set-NsxManager -SsoServer $VCSAHostname -SsoUserName administrator@lab.offis.cloud -SsoPassword OffisLab1! -AcceptAnyThumbprint
+    $ssoConfig = Set-NsxManager -SsoServer $VCSAHostname -SsoUserName labdeploy@lab.offis.cloud -SsoPassword OffisLabDeploy1! -AcceptAnyThumbprint
 
     My-Logger "Disconnecting from NSX Manager ..."
     Disconnect-NsxServer
