@@ -5,7 +5,17 @@
 # Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab
 $VIServer = "172.30.0.10"
 $VIUsername = "labdeploy@lab.offis.cloud"
-$VIPassword = Get-Credential -UserName $VIUsername -Message "Enter your Target vCenter password"
+$VIPassword = Read-Host -Prompt 'Enter your Target vCenter password' -AsSecureString
+$VIPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($VIPassword))
+$LabNumber = Read-Host -Prompt 'Input the lab number'
+
+if ($LabNumber -lt 4) {
+    $VMDatastore = "pesxi1_datastore"
+    $VMCluster = "labcluster1"
+} else {
+    $VMDatastore = "pesxi2_datastore"
+    $VMCluster = "labcluster2"
+}
 
 # Specifies whether deployment is to an ESXi host or vCenter Server
 # Use either ESXI or VCENTER
@@ -20,9 +30,9 @@ $ESXiProfileName = "ESXi-6.5.0-20170404001-standard" # Used for online upgrade o
 
 # Nested ESXi VMs to deploy
 $NestedESXiHostnameToIPs = @{
-    "lab9-vesxi65-1" = "172.30.9.11"
-    "lab9-vesxi65-2" = "172.30.9.12"
-    "lab9-vesxi65-3" = "172.30.9.13"
+    "lab$LabNumber-vesxi65-1" = "172.30.$LabNumber.11"
+    "lab$LabNumber-vesxi65-2" = "172.30.$LabNumber.12"
+    "lab$LabNumber-vesxi65-3" = "172.30.$LabNumber.13"
 }
 
 # Nested ESXi VM Resources
@@ -33,12 +43,12 @@ $NestedESXiCapacityvDisk = "100" #GB
 
 # VCSA Deployment Configuration
 $VCSADeploymentSize = "tiny"
-$VCSADisplayName = "lab9-vcenter65"
-$VCSAIPAddress = "172.30.9.10"
-$VCSAHostname = "172.30.9.10" #Change to IP if you don't have valid DNS
+$VCSADisplayName = "lab$LabNumber-vcenter65"
+$VCSAIPAddress = "172.30.$LabNumber.10"
+$VCSAHostname = "172.30.$LabNumber.10" #Change to IP if you don't have valid DNS
 $VCSAPrefix = "16"
-$VCSASSODomainName = "lab9.offis.cloud"
-$VCSASSOSiteName = "lab9.offis.cloud"
+$VCSASSODomainName = "lab$LabNumber.offis.cloud"
+$VCSASSOSiteName = "lab$LabNumber.offis.cloud"
 $VCSASSOPassword = "VMware1!"
 $VCSARootPassword = "VMware1!"
 $VCSASSHEnable = "true"
@@ -46,31 +56,31 @@ $VCSASSHEnable = "true"
 # General Deployment Configuration for Nested ESXi, VCSA & NSX VMs
 $VirtualSwitchType = "VDS" # VSS or VDS
 $VMNetwork = "DPortGroup"
-$VMDatastore = "pesxi2_datastore"
+#$VMDatastore = "pesxi2_datastore"
 $VMNetmask = "255.255.0.0"
 $VMGateway = "172.30.0.1"
 $VMDNS = "172.30.0.1"
 $VMNTP = "172.30.0.1"
 $VMPassword = "VMware1!"
-$VMDomain = "lab9.offis.cloud"
+$VMDomain = "lab$LabNumber.offis.cloud"
 $VMSyslog = "172.30.0.1"
 # Applicable to Nested ESXi only
 $VMSSH = "true"
 $VMVMFS = "false"
 # Applicable to VC Deployment Target only
-$VMCluster = "labcluster2"
+#$VMCluster = "labcluster2"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
-$NewVCDatacenterName = "offislab9"
-$NewVCVSANClusterName = "offislab9"
+$NewVCDatacenterName = "offislab$LabNumber"
+$NewVCVSANClusterName = "offislab$LabNumber"
 
 # NSX Manager Configuration
 $DeployNSX = 1
 $NSXvCPU = "2" # Reconfigure NSX vCPU
 $NSXvMEM = "8" # Reconfigure NSX vMEM (GB)
-$NSXDisplayName = "lab9-nsx63"
-$NSXHostname = "172.30.9.20"
-$NSXIPAddress = "172.30.9.20"
+$NSXDisplayName = "lab$LabNumber-nsx63"
+$NSXHostname = "172.30.$LabNumber.20"
+$NSXIPAddress = "172.30.$LabNumber.20"
 $NSXNetmask = "255.255.0.0"
 $NSXGateway = "172.30.0.1"
 $NSXSSHEnable = "true"
