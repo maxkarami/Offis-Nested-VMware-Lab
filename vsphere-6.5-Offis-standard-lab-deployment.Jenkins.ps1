@@ -8,8 +8,6 @@ param($VIPassword, $LabNumber)
 $VIServer = "172.30.0.10"
 $VIUsername = "labdeploy@lab.offis.cloud"
 
-Write-Host $VIPassword
-Write-Host $LabNumber
 
 if ($LabNumber -lt 4) {
     $VMDatastore = "pesxi1_datastore"
