@@ -7,9 +7,7 @@ param($VIPassword, $LabNumber)
 # Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab
 $VIServer = "172.30.0.10"
 $VIUsername = "labdeploy@lab.offis.cloud"
-#$VIPassword = Read-Host -Prompt 'Enter The Target vCenter Lab password'
 
-#$LabNumber = Read-Host -Prompt "Input Your lab number (1-8), Make sure this lab doens't exist"
 
 if ($LabNumber -lt 4) {
     $VMDatastore = "pesxi1_datastore"
