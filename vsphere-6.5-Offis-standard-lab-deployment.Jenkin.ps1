@@ -1,3 +1,5 @@
+param($VIPassword, $LabNumber)
+
 # Description: PowerCLI script to deploy a fully functional vSphere 6.5 lab consisting of 3
 #               Nested ESXi hosts enable w/vSAN + VCSA 6.5. Expects a single physical ESXi host
 #               as the endpoint and all four VMs will be deployed to physical ESXi host
@@ -5,9 +7,9 @@
 # Physical ESXi host or vCenter Server to deploy vSphere 6.5 lab
 $VIServer = "172.30.0.10"
 $VIUsername = "labdeploy@lab.offis.cloud"
-$VIPassword = Read-Host -Prompt 'Enter The Target vCenter Lab password'
+#$VIPassword = Read-Host -Prompt 'Enter The Target vCenter Lab password'
 
-$LabNumber = Read-Host -Prompt "Input Your lab number (1-8), Make sure this lab doens't exist"
+#$LabNumber = Read-Host -Prompt "Input Your lab number (1-8), Make sure this lab doens't exist"
 
 if ($LabNumber -lt 4) {
     $VMDatastore = "pesxi1_datastore"
