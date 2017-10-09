@@ -400,12 +400,7 @@ if($confirmDeployment -eq 1) {
     Write-Host -NoNewline -ForegroundColor Green "Total Storage: "
     Write-Host -ForegroundColor White ($esxiTotalStorage + $vcsaTotalStorage + $nsxTotalStorage) "GB"
 
-    Write-Host -ForegroundColor Magenta "`nWould you like to proceed with this deployment?`n"
-    #$answer = Read-Host -Prompt "Do you accept (Y or N)"
-    #if($answer -ne "Y" -or $answer -ne "y") {
-        exit
-    #}
-    Clear-Host
+
 }
 
 My-Logger "Connecting to $VIServer ..."
